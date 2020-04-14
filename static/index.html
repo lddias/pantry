@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.bootstrap4.css" />
+    <link rel="stylesheet" type="text/css" href="https://bootstrap-tagsinput.github.io/bootstrap-tagsinput/dist/bootstrap-tagsinput.css" />
+    <link rel="stylesheet" type="text/css" href="https://bootstrap-tagsinput.github.io/bootstrap-tagsinput/examples/assets/app.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" />
+
+    <style>
+        /* For mobile phones: */
+        .datepicker td,
+        .datepicker th {
+            width: 1.5em;
+            height: 1.5em;
+        }
+
+        @media only screen and (min-width: 768px) {
+
+            /* For desktop: */
+            #example {
+                width: 400px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row" style="margin-top: 10px; margin-bottom:10px">
+            <div class="col-2">
+                <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                    Add new item
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 collapse" id="collapseExample">
+                <form id="new-item" onsubmit="return addItem(event)">
+                    <div class="row form-group">
+                        <div class="col-12">
+                            <label for="name">Item Name</label>
+                            <input type="text" class="form-control" id="name" name="name">
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-12">
+                            <label for="location">Location</label>
+                            <input type="text" class="form-control" id="location" name="location" data-role="tagsinput">
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-12">
+                            <label for="name">Categories</label>
+                            <input type="text" class="form-control" id="categories" name="categories" data-role="tagsinput">
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-4">
+                            <label for="expiration">Expiration</label>
+                            <input id="expiration" style="width: 100%"  name="expiration" data-provide="datepicker">
+                        </div>
+                        <div class="col-4">
+                            <label for="quantity">Qty</label>
+                            <input id="quantity" style="width: 100%" name="quantity" type="number">
+                        </div>
+                        <div class="col-4">
+                            <button type="submit" class="btn btn-primary float-right">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <table id="example" class="display table table-striped table-bordered nowrap" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Location</th>
+                            <th>Categories</th>
+                            <th>Quantity</th>
+                            <th>Expiration</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous">
+    </script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
+    </script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js">
+    </script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.js">
+    </script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.js">
+    </script>
+    <script type="text/javascript" charset="utf8" src="https://bootstrap-tagsinput.github.io/bootstrap-tagsinput/dist/bootstrap-tagsinput.js">
+    </script>
+    <script type="text/javascript" charset="utf8" src="static/js/typeahead.bundle.js">
+    </script>
+    <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js">
+    </script>
+    <script>
+        var dt = undefined;
+        var categories = new Set();
+        var locations = new Set();
+        var ws = new WebSocket("ws://" + location.host + "/pantry");
+
+        function serializeForm (arrayData) {
+          var objectData;
+          objectData = {};
+
+          $.each(arrayData, function() {
+            var value;
+
+            if (this.value != null) {
+              value = this.value;
+            } else {
+              value = '';
+            }
+
+            if (objectData[this.name] != null) {
+              if (!objectData[this.name].push) {
+                objectData[this.name] = [objectData[this.name]];
+              }
+
+              objectData[this.name].push(value);
+            } else {
+              objectData[this.name] = value;
+            }
+          });
+
+          return objectData;
+        };
+
+        function addItem(e) {
+            e.preventDefault();
+            var x = $("#new-item").serializeArray();
+            var y = serializeForm(x);
+            console.log('sending:');
+            console.log(y);
+            y['quantity'] = Number(y['quantity']);
+            ws.send(JSON.stringify(y));
+            return false;
+        };
+
+        function init_tagsinput(selector, list) {
+            var bloodhound = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.whitespace,
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                local: list
+            });
+            bloodhound.initialize();
+            function searchWithDefaults(q, sync) {
+              if (q === '') {
+                sync(bloodhound.index.all());
+              } else {
+                bloodhound.search(q, sync);
+              }
+            }
+            $(selector).tagsinput({
+                tagClass: 'badge badge-primary',
+                typeaheadjs: [{
+                        hint: true,
+                        highlight: true,
+                        minLength: 0
+                    },
+                    {
+                        source: searchWithDefaults
+                    }
+                ]
+            });
+        }
+
+        ws.onmessage = function(event) {
+            console.log(event);
+            var data = JSON.parse(event.data);
+            $(document).ready(function() {
+                categories = new Set();
+                if (dt === undefined) {
+                    dt = $('#example').DataTable({
+                        responsive: true,
+                        data: data,
+                        columnDefs: [{
+                                "render": function(data, type, row) {
+                                    if (type == "display")
+                                        return data.sort().map(function(d) {
+                                            categories.add(d);
+                                            return '<span class="badge badge-primary" style="margin: 1px">' + d + '</span>'
+                                        }).join('');
+                                    return data;
+                                },
+                                "targets": 2
+                            },
+                            {
+                                "render": function(data, type, row) {
+                                    if (type == "display")
+                                        return data.sort().map(function(d) {
+                                            locations.add(d);
+                                            return '<span class="badge badge-primary" style="margin: 1px">' + d + '</span>'
+                                        }).join('');
+                                    return data;
+                                },
+                                "targets": 1
+                            }
+                        ],
+                        initComplete: function(settings, json) {
+                            $('#categories').tagsinput('destroy');
+                            init_tagsinput('#categories', Array.from(categories));
+                            $('#location').tagsinput('destroy');
+                            init_tagsinput('#location', Array.from(locations));
+                        }
+                    });
+                } else {
+                    dt.clear().draw();
+                    dt.rows.add(data).draw();
+                }
+            });
+        };
+        ws.onopen = function(event) {
+            console.log("WebSocket is open now.");
+            ws.send('request');
+        };
+    </script>
+</body>
+
+</html>
