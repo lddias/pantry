@@ -3,31 +3,31 @@ var categories = new Set();
 var locations = new Set();
 var ws = new WebSocket("ws://" + location.host + "/pantry");
 
-function serializeForm (arrayData) {
-  var objectData;
-  objectData = {};
+function serializeForm(arrayData) {
+    var objectData;
+    objectData = {};
 
-  $.each(arrayData, function() {
-    var value;
+    $.each(arrayData, function() {
+        var value;
 
-    if (this.value != null) {
-      value = this.value;
-    } else {
-      value = '';
-    }
+        if (this.value != null) {
+            value = this.value;
+        } else {
+            value = '';
+        }
 
-    if (objectData[this.name] != null) {
-      if (!objectData[this.name].push) {
-        objectData[this.name] = [objectData[this.name]];
-      }
+        if (objectData[this.name] != null) {
+            if (!objectData[this.name].push) {
+                objectData[this.name] = [objectData[this.name]];
+            }
 
-      objectData[this.name].push(value);
-    } else {
-      objectData[this.name] = value;
-    }
-  });
+            objectData[this.name].push(value);
+        } else {
+            objectData[this.name] = value;
+        }
+    });
 
-  return objectData;
+    return objectData;
 };
 
 function addItem(e) {
@@ -48,12 +48,13 @@ function init_tagsinput(selector, list) {
         local: list
     });
     bloodhound.initialize();
+
     function searchWithDefaults(q, sync) {
-      if (q === '') {
-        sync(bloodhound.index.all());
-      } else {
-        bloodhound.search(q, sync);
-      }
+        if (q === '') {
+            sync(bloodhound.index.all());
+        } else {
+            bloodhound.search(q, sync);
+        }
     }
     $(selector).tagsinput({
         tagClass: 'badge badge-primary',
@@ -72,6 +73,31 @@ function init_tagsinput(selector, list) {
         $(this).val('');
     });
 }
+
+function datatableUpdateCallback(settings, json) {
+    $('#categories').tagsinput('destroy');
+    init_tagsinput('#categories', Array.from(categories));
+    $('#location').tagsinput('destroy');
+    init_tagsinput('#location', Array.from(locations));
+};
+
+(function() {
+  'use strict';
+  window.addEventListener('load', function() {
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    var forms = document.getElementsByClassName('needs-validation');
+    // Loop over them and prevent submission
+    var validation = Array.prototype.filter.call(forms, function(form) {
+      form.addEventListener('submit', function(event) {
+        if (form.checkValidity() === false) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  }, false);
+})();
 
 ws.onmessage = function(event) {
     console.log(event);
@@ -105,12 +131,8 @@ ws.onmessage = function(event) {
                         "targets": 1
                     }
                 ],
-                initComplete: function(settings, json) {
-                    $('#categories').tagsinput('destroy');
-                    init_tagsinput('#categories', Array.from(categories));
-                    $('#location').tagsinput('destroy');
-                    init_tagsinput('#location', Array.from(locations));
-                }
+                initComplete: datatableUpdateCallback,
+                drawCallback: datatableUpdateCallback
             });
         } else {
             dt.clear().draw();

@@ -42,33 +42,53 @@
         </div>
         <div class="row">
             <div class="col-12 collapse" id="collapseExample">
-                <form id="new-item" onsubmit="return addItem(event)">
-                    <div class="row form-group">
+                <form id="new-item" onsubmit="return addItem(event)" class="needs-validation" novalidate>
+                    <div class="form-row form-group">
                         <div class="col-12">
                             <label for="name">Item Name</label>
-                            <input type="text" class="form-control" id="name" name="name">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="name" name="name" required>
+                                <div class="invalid-feedback">
+                                  Please specify an item name.
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="row form-group">
+                    <div class="form-row form-group">
                         <div class="col-12">
                             <label for="location">Location</label>
-                            <input type="text" class="form-control" id="location" name="location" data-role="tagsinput">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="location" name="location" data-role="tagsinput" required>
+                                <div class="invalid-feedback">
+                                  Please specify a location.
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="row form-group">
+                    <div class="form-row form-group">
                         <div class="col-12">
                             <label for="name">Categories</label>
                             <input type="text" class="form-control" id="categories" name="categories" data-role="tagsinput">
                         </div>
                     </div>
-                    <div class="row form-group">
+                    <div class="form-row form-group">
                         <div class="col-4">
                             <label for="expiration">Expiration</label>
-                            <input id="expiration" style="width: 100%"  name="expiration" data-provide="datepicker">
+                            <div class="input-group">
+                                <input id="expiration" style="width: 100%" name="expiration" data-provide="datepicker" required>
+                                <div class="invalid-feedback">
+                                  Please specify an expiration date.
+                                </div>
+                            </div>
                         </div>
                         <div class="col-4">
                             <label for="quantity">Qty</label>
-                            <input id="quantity" style="width: 100%" name="quantity" type="number">
+                            <div class="input-group">
+                                <input id="quantity" style="width: 100%" name="quantity" type="number" required>
+                                <div class="invalid-feedback">
+                                  Please specify a quantity.
+                                </div>
+                            </div>
                         </div>
                         <div class="col-4">
                             <button type="submit" class="btn btn-primary float-right">Submit</button>
