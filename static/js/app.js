@@ -30,14 +30,20 @@ function serializeForm(arrayData) {
     return objectData;
 };
 
-function addItem(e) {
-    e.preventDefault();
-    var x = $("#new-item").serializeArray();
-    var y = serializeForm(x);
-    console.log('sending:');
-    console.log(y);
-    y['quantity'] = Number(y['quantity']);
-    ws.send(JSON.stringify(y));
+function addItem(event) {
+    event.preventDefault();
+    var form = event.target;
+    if (form.checkValidity() === false) {
+        event.stopPropagation();
+    } else {
+        var x = $("#new-item").serializeArray();
+        var y = serializeForm(x);
+        console.log('sending:');
+        console.log(y);
+        y['quantity'] = Number(y['quantity']);
+        ws.send(JSON.stringify(y));
+    }
+    form.classList.add('was-validated');
     return false;
 };
 
@@ -81,24 +87,6 @@ function datatableUpdateCallback(settings, json) {
     init_tagsinput('#location', Array.from(locations));
 };
 
-(function() {
-  'use strict';
-  window.addEventListener('load', function() {
-    // Fetch all the forms we want to apply custom Bootstrap validation styles to
-    var forms = document.getElementsByClassName('needs-validation');
-    // Loop over them and prevent submission
-    var validation = Array.prototype.filter.call(forms, function(form) {
-      form.addEventListener('submit', function(event) {
-        if (form.checkValidity() === false) {
-          event.preventDefault();
-          event.stopPropagation();
-        }
-        form.classList.add('was-validated');
-      }, false);
-    });
-  }, false);
-})();
-
 ws.onmessage = function(event) {
     console.log(event);
     var data = JSON.parse(event.data);
@@ -109,7 +97,7 @@ ws.onmessage = function(event) {
                 responsive: true,
                 data: data,
                 columnDefs: [{
-                        "render": function(data, type, row) {
+                        render: function(data, type, row) {
                             if (type == "display")
                                 return data.sort().map(function(d) {
                                     categories.add(d);
@@ -117,10 +105,10 @@ ws.onmessage = function(event) {
                                 }).join('');
                             return data;
                         },
-                        "targets": 2
+                        targets: 3
                     },
                     {
-                        "render": function(data, type, row) {
+                        render: function(data, type, row) {
                             if (type == "display")
                                 return data.sort().map(function(d) {
                                     locations.add(d);
@@ -128,7 +116,11 @@ ws.onmessage = function(event) {
                                 }).join('');
                             return data;
                         },
-                        "targets": 1
+                        targets: 2
+                    },
+                    {
+                        visible: false,
+                        targets: 0
                     }
                 ],
                 initComplete: datatableUpdateCallback,
@@ -138,8 +130,25 @@ ws.onmessage = function(event) {
             dt.clear().draw();
             dt.rows.add(data).draw();
         }
+        $('#example tbody').on('click', 'tr', function () {
+            var data = dt.row( this ).data();
+            $('#_id').val(data[0]);
+            $('#name').val(data[1]);
+            $('#location').tagsinput('removeAll');
+            data[2].forEach(function (d) {
+                $('#location').tagsinput('add', d);
+            });
+            $('#categories').tagsinput('removeAll');
+            data[3].forEach(function (d) {
+                $('#categories').tagsinput('add', d);
+            });
+            $('#quantity').val(data[4]);
+            $('#expiration').val(data[5]);
+            $('#collapseExample').collapse('show');
+        } );
     });
 };
+
 ws.onopen = function(event) {
     console.log("WebSocket is open now.");
     ws.send('request');

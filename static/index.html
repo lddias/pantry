@@ -43,6 +43,9 @@
         <div class="row">
             <div class="col-12 collapse" id="collapseExample">
                 <form id="new-item" onsubmit="return addItem(event)" class="needs-validation" novalidate>
+                    <div class="hidden form-group">
+                        <input type="hidden" readonly="" id="_id" name="_id" value="">
+                    </div>
                     <div class="form-row form-group">
                         <div class="col-12">
                             <label for="name">Item Name</label>
@@ -94,6 +97,7 @@
                 <table id="example" class="display table table-striped table-bordered nowrap" cellspacing="0" width="100%">
                     <thead>
                         <tr>
+                            <th></th>
                             <th>Name</th>
                             <th>Location</th>
                             <th>Categories</th>

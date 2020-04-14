@@ -6,6 +6,7 @@ import logging
 from asgiref.wsgi import WsgiToAsgi
 import motor.motor_asyncio
 import pymongo
+from bson.objectid import ObjectId
 from pyramid.config import Configurator
 from pyramid.response import Response
 
@@ -14,6 +15,8 @@ class ComplexEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, bytes):
             return obj.decode()
+        elif isinstance(obj, ObjectId):
+            return str(obj)
         # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)
 
@@ -73,7 +76,8 @@ def set_envelope(msg):
 @app.route("/pantry", protocol="websocket")
 async def pantry_websocket(scope, receive, send):
     def transform_doc(x):
-        return (x['name'],
+        return (x['_id'],
+                x['name'],
                 x['location'],
                 x['categories'],
                 x['quantity'],
@@ -95,7 +99,12 @@ async def pantry_websocket(scope, receive, send):
                     item['categories'] = item['categories'].split(',')
                     dt = datetime.datetime.strptime(item['expiration'], '%m/%d/%Y')
                     item['expiration'] = dt
-                    await db.pantry.insert_one(item)
+                    if not item['_id']:
+                        del item['_id']
+                        await db.pantry.insert_one(item)
+                    else:
+                        item['_id'] = ObjectId(item['_id'])
+                        await db.pantry.replace_one({'_id': item['_id']}, item)
                     await send(set_envelope([transform_doc(x) async
                                                 for x in db.pantry.find()]))
         elif message["type"] == "websocket.disconnect":
