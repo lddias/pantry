@@ -67,6 +67,10 @@ function init_tagsinput(selector, list) {
             }
         ]
     });
+    $(selector).tagsinput(selector).blur(function() {
+        $(selector).tagsinput('add', $(this).val());
+        $(this).val('');
+    });
 }
 
 ws.onmessage = function(event) {
