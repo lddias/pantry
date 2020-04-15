@@ -95,16 +95,19 @@ async def pantry_websocket(scope, receive, send):
                                                 for x in db.pantry.find()]))
                 else:
                     item = json.loads(text)
-                    item['location'] = item['location'].split(',')
-                    item['categories'] = item['categories'].split(',')
-                    dt = datetime.datetime.strptime(item['expiration'], '%m/%d/%Y')
-                    item['expiration'] = dt
-                    if not item['_id']:
-                        del item['_id']
-                        await db.pantry.insert_one(item)
+                    if 'delete' in item:
+                        await db.pantry.delete_many({'_id': ObjectId(item['_id'])})
                     else:
-                        item['_id'] = ObjectId(item['_id'])
-                        await db.pantry.replace_one({'_id': item['_id']}, item)
+                        item['location'] = item['location'].split(',')
+                        item['categories'] = item['categories'].split(',')
+                        dt = datetime.datetime.strptime(item['expiration'], '%m/%d/%Y')
+                        item['expiration'] = dt
+                        if not item['_id']:
+                            del item['_id']
+                            await db.pantry.insert_one(item)
+                        else:
+                            item['_id'] = ObjectId(item['_id'])
+                            await db.pantry.replace_one({'_id': item['_id']}, item)
                     await send(set_envelope([transform_doc(x) async
                                                 for x in db.pantry.find()]))
         elif message["type"] == "websocket.disconnect":

@@ -71,24 +71,24 @@
                         </div>
                     </div>
                     <div class="form-row form-group">
-                        <div class="col-4">
+                        <div class="col-6">
                             <label for="expiration">Expiration</label>
                             <input class="form-control" id="expiration" style="width: 100%" name="expiration" data-provide="datepicker" required>
                             <div class="invalid-feedback">
                               Please specify an expiration date.
                             </div>
                         </div>
-                        <div class="col-4">
+                        <div class="col-6">
                             <label for="quantity">Qty</label>
                             <input class="form-control" id="quantity" style="width: 100%" name="quantity" type="number" required>
                             <div class="invalid-feedback">
                               Please specify a quantity.
                             </div>
                         </div>
-                        <div class="col-4">
-                            <button type="submit" class="btn btn-primary float-right">Submit</button>
-                        </div>
                     </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="reset" onclick="clearItem()" class="btn btn-secondary">Clear</button>
+                    <button type="button" onclick="deleteItem()" class="btn btn-danger">Delete</button>
                 </form>
             </div>
         </div>

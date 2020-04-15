@@ -47,6 +47,20 @@ function addItem(event) {
     return false;
 };
 
+function clearItem() {
+    $('#_id').val('');
+    $('#location').tagsinput('removeAll');
+    $('#categories').tagsinput('removeAll');
+};
+
+function deleteItem() {
+    if ($('#_id').val())
+        ws.send(JSON.stringify({_id: $('#_id').val(), delete: true}));
+    else {
+        alert('no item selected');
+    }
+}
+
 function init_tagsinput(selector, list) {
     var bloodhound = new Bloodhound({
         datumTokenizer: Bloodhound.tokenizers.whitespace,
