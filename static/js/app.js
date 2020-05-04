@@ -107,6 +107,7 @@ ws.onmessage = function(event) {
     var data = JSON.parse(event.data);
     $(document).ready(function() {
         categories = new Set();
+        $.fn.dataTable.moment( 'MM/DD/YYYY' );
         if (dt === undefined) {
             dt = $('#example').DataTable({
                 responsive: true,
