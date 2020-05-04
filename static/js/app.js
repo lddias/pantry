@@ -85,7 +85,7 @@ function init_tagsinput(selector, list) {
             },
             {
                 source: searchWithDefaults,
-                limit: list.length - 1
+                limit: list.length
             }
         ]
     });
