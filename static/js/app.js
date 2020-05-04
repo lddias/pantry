@@ -84,7 +84,8 @@ function init_tagsinput(selector, list) {
                 minLength: 0
             },
             {
-                source: searchWithDefaults
+                source: searchWithDefaults,
+                limit: list.length - 1
             }
         ]
     });
