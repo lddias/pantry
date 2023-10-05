@@ -1,4 +1,4 @@
 asgiref
 pyramid
-uvicorn
+uvicorn[standard]
 motor
